@@ -2,11 +2,11 @@
 
 ### A leakage-audited benchmark on the HCRL Car-Hacking dataset, with SHAP explanations and a fully local LLM incident reporter
 
-![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)
-![Model](https://img.shields.io/badge/model-XGBoost-orange)
-![Explainability](https://img.shields.io/badge/explainability-TreeSHAP-green)
-![LLM](https://img.shields.io/badge/LLM-Ollama%20%2B%20qwen3%3A4b-purple)
-![Dashboard](https://img.shields.io/badge/dashboard-Streamlit-red)
+[![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
+[![Model](https://img.shields.io/badge/model-XGBoost-orange)](https://github.com/dmlc/xgboost)
+[![Explainability](https://img.shields.io/badge/explainability-TreeSHAP-green)](https://github.com/shap/shap)
+[![LLM](https://img.shields.io/badge/LLM-Ollama%20%2B%20qwen3%3A4b-purple)](https://ollama.com/library/qwen3:4b)
+[![Dashboard](https://img.shields.io/badge/dashboard-Streamlit-red)](https://github.com/streamlit/streamlit)
 ![Cloud](https://img.shields.io/badge/cloud%20dependencies-none-lightgrey)
 
 > **Summer internship project, Center of Excellence (CoE) in e-Mobility, Department of Electronics and Communication Engineering, RV College of Engineering (RVCE), Bengaluru.**
