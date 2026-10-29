@@ -1,0 +1,74 @@
+{
+  "run_started_utc": "2026-09-13T06:46:08.345874+00:00",
+  "run_finished_utc": "2026-09-13T06:46:36.394646+00:00",
+  "random_seed": 42,
+  "class_names": [
+    "DoS",
+    "Fuzzy",
+    "Gear",
+    "Normal",
+    "RPM"
+  ],
+  "dataset": {
+    "train_rows": 123928,
+    "val_rows": 33247,
+    "test_rows": 33247,
+    "train_class_counts": {
+      "DoS": 19560,
+      "Fuzzy": 22161,
+      "Gear": 14118,
+      "Normal": 53112,
+      "RPM": 14977
+    }
+  },
+  "imbalance_handling": {
+    "method": "inverse-frequency sample weights (sklearn compute_sample_weight('balanced', ...))",
+    "applied_to": [
+      "train",
+      "validation"
+    ],
+    "reason": "residual imbalance survives preprocessing's undersampling"
+  },
+  "hyperparameters": {
+    "objective": "multi:softprob",
+    "num_class": 5,
+    "max_depth": 6,
+    "eta": 0.1,
+    "n_estimators_max": 300,
+    "early_stopping_rounds": 20,
+    "eval_metric": "mlogloss"
+  },
+  "model_comparison": [
+    {
+      "model": "random_forest",
+      "val_macro_f1": 0.9991052420576448,
+      "val_weighted_f1": 0.9993681961342491,
+      "train_seconds": 4.9898388385772705
+    },
+    {
+      "model": "xgboost",
+      "val_macro_f1": 0.9990475412275005,
+      "val_weighted_f1": 0.9993080676291233,
+      "train_seconds": 3.017303943634033
+    },
+    {
+      "model": "lightgbm",
+      "val_macro_f1": 0.9989093210654081,
+      "val_weighted_f1": 0.9992177740427799,
+      "train_seconds": 4.8764259815216064
+    }
+  ],
+  "final_training": {
+    "best_iteration": 114,
+    "trees_persisted": 575,
+    "final_train_loss": 0.00017548128825696,
+    "final_val_loss": 0.00466342727740147,
+    "best_val_loss": 0.00451464044945657,
+    "val_macro_f1_at_comparison_stage": 0.9990475412275005
+  },
+  "artifacts": {
+    "model": "models/xgb_model.json",
+    "checkpoints_dir": "models/checkpoints",
+    "figures_dir": "reports/figures"
+  }
+}

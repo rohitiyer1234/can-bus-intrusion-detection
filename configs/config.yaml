@@ -1,0 +1,104 @@
+
+# ============================================================
+# CAN IDS — Central Configuration
+# Single source of truth for preprocessing, training, and eval.
+# ============================================================
+
+paths:
+  raw_dir: "data/raw"                 # HCRL Car-Hacking CSVs go here
+  interim_dir: "data/interim"
+  processed_dir: "data/processed"
+  models_dir: "models"
+  reports_dir: "reports"
+  logs_dir: "logs"
+
+dataset:
+  name: "car_hacking_hcrl"
+  files:
+    normal: "normal_run_data.csv"
+    dos: "DoS_dataset.csv"
+    fuzzy: "Fuzzy_dataset.csv"
+    gear: "gear_dataset.csv"
+    rpm: "RPM_dataset.csv"
+  # Raw CSV columns as published by HCRL (order matters, no header row in source files)
+  raw_columns: ["timestamp", "can_id", "dlc", "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "flag"]
+  label_map:
+    R: "Normal"
+    T: "Attack"        # overwritten per-file with the specific attack name during preprocessing
+
+# NOTE: a `target_ids` block (hardcoded gear/RPM/DoS CAN IDs specific to the HCRL
+# Car-Hacking capture vehicle) previously lived here and fed two features
+# (gear_rpm_id_freq, attack_id_msg_rate). Removed after design review: CAN ID
+# assignments are not standardized across vehicles, so those features amounted to
+# a lookup table for this one dataset rather than a generalizable behavioral
+# signal. See preprocessing/feature_extractor.py docstring for the full reasoning
+# and max_id_msg_rate for the generic replacement.
+
+windowing:
+  window_ms: 100          # sliding window length
+  stride_ms: 50            # hop size (50% overlap)
+  min_msgs_per_window: 3   # drop windows with too few messages to compute stats reliably
+  # Window label = any-attack-present (attack-priority among non-Normal messages),
+  # NOT majority vote. Decision made after analysis: majority vote collapses
+  # Gear/RPM spoofing windows to near-zero because those attacks share bus
+  # bandwidth fairly with background traffic (~20-25% share even mid-burst),
+  # unlike DoS which floods the highest-arbitration-priority ID and dominates
+  # its windows outright. See preprocessing/feature_extractor.py docstring on
+  # extract_window_features for the full reasoning and literature citation.
+  label_strategy: "any_attack_present"
+
+features:
+  # toggle groups on/off without touching feature_extractor.py logic
+  timing: true
+  id_distribution: true
+  dlc_payload_entropy: true
+  payload_stats: true
+  hamming: true
+  compound: true
+
+baseline:
+  # seconds of normal traffic used to build the per-ID timing / known-ID baseline table
+  baseline_seconds: 60
+
+split:
+  train: 0.7
+  val: 0.15
+  test: 0.15
+  stratify: true
+  random_seed: 42
+  # Split STRATEGY (Section 8 leakage fix). 100ms windows with 50ms stride overlap
+  # 50% with their neighbours, so a plain row-wise train_test_split scatters
+  # near-duplicate windows across train/val/test and inflates every metric. We
+  # instead group windows into contiguous, non-overlapping time blocks per source
+  # file and assign whole blocks to a single split, so no window's overlap-neighbour
+  # can ever land in a different split. Groups are stratified by each block's
+  # dominant class so all 5 classes stay present in every split.
+  #   grouped_by_time_block -> leakage-free grouped split (default, correct)
+  #   random                -> legacy ungrouped stratified split (leaky; kept only
+  #                            for before/after leakage comparison, do NOT deploy)
+  strategy: "grouped_by_time_block"
+  block_seconds: 10        # time-block width for grouping (file spans 2833-10179s -> 283-1017 blocks/file)
+
+balance:
+  # Undersample the Normal majority class down to `multiplier` * mean(other class
+  # counts). Applied ONLY to the training split (val/test stay untouched and honest).
+  # Was previously a hardcoded literal (3.0) inside run_pipeline() -- now config-driven.
+  majority_class: "Normal"
+  multiplier: 3.0
+
+model:
+  type: "xgboost"
+  objective: "multi:softprob"
+  num_class: 5             # Normal, DoS, Fuzzy, Gear, RPM
+  max_depth: 6
+  eta: 0.1
+  n_estimators: 300
+  early_stopping_rounds: 20
+  eval_metric: "mlogloss"
+
+llm:
+  provider: "ollama"
+  model: "qwen3:4b"
+  max_report_words: 200
+
+random_seed: 42

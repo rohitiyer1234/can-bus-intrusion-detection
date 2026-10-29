@@ -1,0 +1,37 @@
+# Python environments
+.venv/
+venv/
+env/
+
+# Datasets and raw CAN captures
+data/
+
+# ZIP archives
+*.zip
+/zip
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE settings
+.vscode/
+.idea/
+
+# Temporary files
+*.log
+*.tmp
